@@ -21,9 +21,11 @@ def main():
         st.write('Total product count：', data['total_count'])
         page_num = math.ceil(int(data['total_count']) / 30)
         st.write('Total page：', page_num)
+        colnames = list(data['items'][0].keys())
+        options = st.multiselect('Filter', colnames, colnames)
         st.write('First page data result：')
         dataframe = pd.DataFrame(data['items'])
-        st.write(dataframe)
+        st.write(dataframe[options])
     else:
         st.write('Please enter correct store_id')
 
