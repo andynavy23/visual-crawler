@@ -4,7 +4,7 @@ import pandas as pd
 import re
 import math
 
-def main():
+def shopee():
     store_id = st.text_input('Enter store_id')
     newest = 0
     header = {
@@ -30,4 +30,4 @@ def main():
         st.write('Please enter correct store_id')
 
 if __name__ == '__main__':
-    main()
+    shopee()
