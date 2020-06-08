@@ -1,13 +1,37 @@
 import streamlit as st
-from shopee_crawler import shopee
-from pchome_crawler import pchome
+import requests
+import base64
+from bs4 import BeautifulSoup
+import pandas as pd
 
-platform_list = ('', 'Shopee', 'PChome')
-platform_selectbox = st.sidebar.selectbox('Choose one platform', platform_list)
+# download file
+def get_table_download_link(df):
+    """Generates a link allowing the data in a given panda dataframe to be downloaded
+    in:  dataframe
+    out: href string
+    """
+    csv = df.to_csv(index=False)
+    b64 = base64.b64encode(csv.encode()).decode()  # some strings <-> bytes conversions necessary here
+    href = f'<a href="data:file/csv;base64,{b64}" download="data.csv">Download csv file</a>'
+    return href
 
-if platform_selectbox == 'Shopee':
-    shopee()
-elif platform_selectbox == 'PChome':
-    pchome()
-else:
-    st.header('Choose one platform to see crawler result')
+text = st.text_input('請輸入日期( 例如: 2020-01-01 ): ')
+if text:
+    url = 'https://edapromoter.000webhostapp.com/mobo.php?d=' + text
+    page = requests.get(url=url)
+    soup = BeautifulSoup(page.content, 'html.parser')
+    columns = [i.text for i in soup.find_all('tr')[0].find_all('th')]
+    rows = []
+    row = []
+    num = 1
+    for i in soup.find_all('td'):
+        row.append(i.text)
+        num = num + 1
+        if num == 26:
+            rows.append(row)
+            row = []
+            num = 1
+    df = pd.DataFrame(data=rows, columns=columns)
+    st.write('表格抓取如下：')
+    st.dataframe(data=df, width=2400, height=1200)
+    st.markdown(get_table_download_link(df), unsafe_allow_html=True)
